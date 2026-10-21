@@ -1,48 +1,819 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Tables & Match Analytics</title>
-    <meta name="description" content="Overview of football tables, standings, match statistics, and data representations.">
-    <link rel="canonical" href="https://stijndegroot16-maker.github.io/footy-tables-analytics2.0/">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-            line-height: 1.6;
-            color: #333;
-        }
-        h1 { color: #1a252f; }
-        .links-card {
-            background: #f4f6f8;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border-left: 4px solid #0066cc;
-        }
-        a {
-            color: #0066cc;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Voetbalgids: standen, statistieken en wedstrijdplanner</title>
+  <meta name="description" content="Leer voetbalstanden en wedstrijdstatistieken begrijpen. Plan een wedstrijd, bereken je voorbereidingstijd en download een agenda-afspraak.">
+  <link rel="canonical" href="https://stijndegroot16-maker.github.io/footy-tables-analytics2.0/">
+  <meta name="theme-color" content="#153e75">
+
+  <style>
+    :root {
+      --blue: #153e75;
+      --accent: #075bc4;
+      --ink: #18263b;
+      --muted: #526175;
+      --line: #dce4ef;
+      --soft: #edf4ff;
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: #f5f7fb;
+      color: var(--ink);
+      font: 17px/1.7 system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    .wrap {
+      width: min(100% - 32px, 1000px);
+      margin-inline: auto;
+    }
+
+    header {
+      background: var(--blue);
+      color: var(--white);
+      padding: 48px 0 32px;
+    }
+
+    header p {
+      max-width: 720px;
+      color: #e1ebfa;
+    }
+
+    h1, h2, h3 { line-height: 1.25; }
+
+    h1 {
+      font-size: clamp(1.85rem, 5vw, 2.8rem);
+      margin: 0 0 16px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+
+    h3 { font-size: 1.1rem; }
+
+    p { margin: 0 0 16px; }
+
+    a {
+      color: var(--accent);
+      text-underline-offset: 3px;
+    }
+
+    a:hover { text-decoration-thickness: 2px; }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 3px solid #c77700;
+      outline-offset: 4px;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    nav a {
+      color: white;
+      border: 1px solid #ffffff60;
+      border-radius: 8px;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+
+    main { padding-block: 28px; }
+
+    section {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: clamp(20px, 4vw, 32px);
+      margin-bottom: 22px;
+      scroll-margin-top: 20px;
+    }
+
+    .intro {
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      padding: 20px;
+      background: #f7f9fd;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .card h3 { margin-top: 0; }
+
+    .note {
+      padding: 15px 18px;
+      background: var(--soft);
+      border-left: 4px solid var(--accent);
+      border-radius: 5px;
+      margin: 20px 0 0;
+    }
+
+    .small {
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .95rem;
+    }
+
+    caption {
+      text-align: left;
+      font-weight: 600;
+      padding: 0 0 12px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--soft);
+      color: var(--blue);
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input, select, button {
+      font: inherit;
+      border-radius: 8px;
+    }
+
+    input, select {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      background: white;
+      border: 1px solid #9aa9bd;
+      color: var(--ink);
+      padding: 11px;
+    }
+
+    .field { min-width: 0; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: 0;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover { background: #064a9e; }
+
+    button.secondary {
+      background: #e9eff7;
+      color: var(--blue);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    #planner-result:empty { display: none; }
+
+    #planner-result {
+      margin-top: 20px;
+      padding: 18px;
+      background: var(--soft);
+      border-radius: 9px;
+    }
+
+    #planner-result p:last-child { margin-bottom: 0; }
+
+    .checklist {
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      border-bottom: 1px solid var(--line);
+      padding: 12px 0;
+    }
+
+    details {
+      border-top: 1px solid var(--line);
+      padding: 16px 0;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    details p { margin: 12px 0 0; }
+
+    footer {
+      padding: 8px 0 36px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      header { padding-top: 32px; }
+      th, td { padding: 10px 8px; }
+      .actions button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+
+    @media print {
+      body { background: white; font-size: 12pt; }
+      header { background: white; color: black; padding: 12px 0; }
+      header p { color: black; }
+      nav, .actions, form, .no-print { display: none; }
+      section { break-inside: avoid; }
+      .wrap { width: 100%; }
+      a { color: black; }
+    }
+  </style>
 </head>
+
 <body>
+  <header>
+    <div class="wrap">
+      <h1>Voetbalstanden begrijpen en je wedstrijd plannen</h1>
+      <p>
+        Wat betekent doelsaldo? Hoe lees je een ranglijst?
+        En hoe zet je een wedstrijd in je agenda?
+        Gebruik deze praktische gids en wedstrijdplanner.
+      </p>
 
-    <h1>Football Tables & Data Representation</h1>
-    <p>Welcome to the central repository for football league standings, data analysis, and visual representations.</p>
-
-    <div class="links-card">
-        <h2>Live Football & TV Coverage</h2>
-        <p>Looking for daily broadcast schedules and live match information? Visit <a href="https://voetbalwedstrijdvandaag.nl/">voetbal op tv vandaag</a> for the latest TV listings.</p>
-        <p>You can also check out our alternative source code repository via the <a href="https://voetbaloptv.bitbucket.io/">Bitbucket Documentation</a>.</p>
+      <nav aria-label="Op deze pagina">
+        <a href="#planner">Wedstrijdplanner</a>
+        <a href="#standen">Standen lezen</a>
+        <a href="#statistieken">Statistieken</a>
+        <a href="#kijken">Kijkchecklist</a>
+        <a href="#bronnen">Links</a>
+      </nav>
     </div>
+  </header>
 
+  <main class="wrap">
+    <section id="planner">
+      <h2>Plan een wedstrijd in je agenda</h2>
+      <p class="intro">
+        Vul de wedstrijd en de aftraptijd in. Je ziet wanneer je
+        voorbereiding begint en kunt een agenda-afspraak downloaden.
+        De ingevoerde tijd wordt geïnterpreteerd in de tijdzone van
+        je apparaat.
+      </p>
+
+      <p id="timezone-info" class="small"></p>
+
+      <noscript>
+        <p class="note">
+          Schakel JavaScript in om de planner en de agendadownload
+          te gebruiken. De rest van deze gids werkt zonder JavaScript.
+        </p>
+      </noscript>
+
+      <form id="match-form">
+        <div class="grid">
+          <div class="field">
+            <label for="match">Wedstrijd</label>
+            <input
+              id="match"
+              name="match"
+              type="text"
+              maxlength="120"
+              placeholder="Bijvoorbeeld: Ajax – PSV"
+              required>
+          </div>
+
+          <div class="field">
+            <label for="kickoff">Datum en aftraptijd</label>
+            <input
+              id="kickoff"
+              name="kickoff"
+              type="datetime-local"
+              required>
+          </div>
+
+          <div class="field">
+            <label for="preparation">Voorbereidingstijd</label>
+            <select id="preparation" name="preparation">
+              <option value="15">15 minuten voor de aftrap</option>
+              <option value="30" selected>30 minuten voor de aftrap</option>
+              <option value="60">60 minuten voor de aftrap</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="duration">Tijd reserveren</label>
+            <select id="duration" name="duration">
+              <option value="120" selected>2 uur</option>
+              <option value="150">2 uur en 30 minuten</option>
+              <option value="180">3 uur</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Bereken mijn planning</button>
+          <button
+            id="download-calendar"
+            class="secondary"
+            type="button"
+            disabled>
+            Download agenda-afspraak (.ics)
+          </button>
+        </div>
+      </form>
+
+      <div id="planner-result" role="status" aria-live="polite"></div>
+
+      <p class="small" style="margin-top:16px">
+        Deze pagina verstuurt je invoer niet naar een server.
+        De planner haalt geen actuele wedstrijden op.
+        Agendameldingen zijn afhankelijk van je agenda-app en instellingen.
+        De gereserveerde tijd is je eigen planning, geen voorspelling
+        van het laatste fluitsignaal.
+      </p>
+    </section>
+
+    <section id="standen">
+      <h2>Hoe lees je een voetbalstand?</h2>
+      <p>
+        Een ranglijst vat de resultaten van een competitie samen.
+        Kijk niet alleen naar punten: het aantal gespeelde wedstrijden
+        en de regels bij een gelijke stand zijn ook belangrijk.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <caption>Veelgebruikte afkortingen in competitietabellen</caption>
+          <thead>
+            <tr>
+              <th scope="col">Afkorting</th>
+              <th scope="col">Betekenis</th>
+              <th scope="col">Waar let je op?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GS / G</td>
+              <td>Gespeelde wedstrijden</td>
+              <td>Teams met minder duels kunnen wedstrijden tegoed hebben.</td>
+            </tr>
+            <tr>
+              <td>W</td>
+              <td>Gewonnen</td>
+              <td>Aantal overwinningen.</td>
+            </tr>
+            <tr>
+              <td>GL</td>
+              <td>Gelijkgespeeld</td>
+              <td>Aantal wedstrijden zonder winnaar.</td>
+            </tr>
+            <tr>
+              <td>V</td>
+              <td>Verloren</td>
+              <td>Aantal nederlagen.</td>
+            </tr>
+            <tr>
+              <td>DV</td>
+              <td>Doelpunten voor</td>
+              <td>Hoe vaak het team heeft gescoord.</td>
+            </tr>
+            <tr>
+              <td>DT</td>
+              <td>Doelpunten tegen</td>
+              <td>Hoeveel doelpunten het team heeft geïncasseerd.</td>
+            </tr>
+            <tr>
+              <td>DS</td>
+              <td>Doelsaldo</td>
+              <td>Doelpunten voor min doelpunten tegen.</td>
+            </tr>
+            <tr>
+              <td>PT / P</td>
+              <td>Punten</td>
+              <td>Het puntentotaal volgens de competitieregels.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <strong>Rekenvoorbeeld — fictieve cijfers:</strong>
+        een team met 6 overwinningen, 3 gelijke spelen en 1 nederlaag
+        heeft 10 wedstrijden gespeeld. Bij 3 punten voor winst en
+        1 voor gelijkspel is het totaal 21 punten.
+        Bij 20 goals voor en 12 tegen is het doelsaldo +8.
+      </div>
+
+      <p class="small" style="margin-top:16px">
+        Afkortingen verschillen per aanbieder. Ook de volgorde van
+        beslissingsregels, zoals doelsaldo en onderling resultaat,
+        verschilt per competitie. Puntenaftrek kan het totaal beïnvloeden.
+      </p>
+    </section>
+
+    <section id="statistieken">
+      <h2>Wedstrijdstatistieken zonder verwarring</h2>
+
+      <div class="grid">
+        <article class="card">
+          <h3>Balbezit</h3>
+          <p>
+            Geeft aan welk aandeel van het balbezit aan een team wordt
+            toegeschreven. Veel balbezit betekent niet automatisch
+            dat een team de beste kansen creëert.
+          </p>
+        </article>
+
+        <article class="card">
+          <h3>Schoten en schoten op doel</h3>
+          <p>
+            Het totale aantal schoten is iets anders dan het aantal
+            schoten op doel. Kijk naar beide cijfers en controleer
+            hoe de dataleverancier deze telt.
+          </p>
+        </article>
+
+        <article class="card">
+          <h3>Expected goals (xG)</h3>
+          <p>
+            xG schat met een statistisch model hoe groot de kans is
+            dat een schot een doelpunt oplevert. De opgetelde waarde
+            beschrijft de kwaliteit van kansen, niet de uitslag die
+            had moeten plaatsvinden.
+          </p>
+        </article>
+
+        <article class="card">
+          <h3>Vorm over recente wedstrijden</h3>
+          <p>
+            Een reeks met winst, gelijkspel en verlies laat recente
+            resultaten zien. De sterkte van tegenstanders,
+            thuis- of uitwedstrijden en de gekozen periode geven context.
+          </p>
+        </article>
+      </div>
+
+      <p class="note">
+        <strong>Vergelijk zorgvuldig:</strong>
+        gebruik bij voorkeur dezelfde databron en dezelfde periode.
+        Statistieken en xG-modellen kunnen per leverancier verschillen.
+      </p>
+    </section>
+
+    <section id="kijken">
+      <h2>Checklist voor je voetbalavond</h2>
+
+      <ol class="checklist">
+        <li>
+          <strong>1. Controleer de wedstrijddatum.</strong>
+          Een wedstrijd kan worden verplaatst. Controleer het programma
+          opnieuw op de speeldag.
+        </li>
+        <li>
+          <strong>2. Let op de tijdzone.</strong>
+          Een buitenlandse website kan een andere lokale tijd tonen.
+          Controleer of de tijd overeenkomt met jouw locatie.
+        </li>
+        <li>
+          <strong>3. Bekijk de beschikbare kijkinformatie.</strong>
+          Uitzendrechten verschillen per land, competitie en wedstrijd.
+          Een zendervermelding voor een ander land geldt niet automatisch
+          voor Nederland.
+        </li>
+        <li>
+          <strong>4. Controleer je abonnement.</strong>
+          Kijk bij de aanbieder of je toegang hebt tot de betreffende
+          zender, stream of aanvullende bundel.
+        </li>
+        <li>
+          <strong>5. Houd ruimte voor uitloop.</strong>
+          Blessuretijd en, waar van toepassing, verlenging en
+          strafschoppen kunnen je planning beïnvloeden.
+        </li>
+      </ol>
+    </section>
+
+    <section id="bronnen">
+      <h2>Wedstrijdprogramma en aanvullende links</h2>
+
+      <article class="card">
+        <h3>Wedstrijden en Nederlandse kijkinformatie</h3>
+        <p>
+          Wil je vanuit deze gids een wedstrijd opzoeken?
+          Bekijk het overzicht van
+          <a href="https://voetbalwedstrijdvandaag.nl/">
+            voetbal op tv vandaag
+          </a>
+          op Voetbalwedstrijdvandaag.nl. Daar vind je
+          wedstrijden, aanvangstijden en beschikbare Nederlandse
+          kijkinformatie.
+        </p>
+        <p class="small">
+          Controleer wijzigingen en de beschikbaarheid van de uitzending
+          ook bij de organisator of aanbieder.
+        </p>
+      </article>
+
+      <article class="card" style="margin-top:16px">
+        <h3>Aanvullende projectpagina</h3>
+        <p>
+          De gekoppelde
+          <a href="https://voetbaloptv.bitbucket.io/">
+            projectpagina op Bitbucket
+          </a>
+          is een aanvullende verwijzing bij dit project.
+        </p>
+        <p class="small">
+          Deze gids gebruikt die pagina niet als live databron.
+        </p>
+      </article>
+    </section>
+
+    <section id="vragen">
+      <h2>Veelgestelde vragen</h2>
+
+      <details>
+        <summary>Toont deze pagina actuele standen of uitslagen?</summary>
+        <p>
+          Nee. Dit is een uitlegpagina met een handmatige planner.
+          Het rekenvoorbeeld is fictief en de planner haalt geen
+          live wedstrijdgegevens op.
+        </p>
+      </details>
+
+      <details>
+        <summary>Waarom hebben teams soms niet evenveel wedstrijden gespeeld?</summary>
+        <p>
+          Dat kan bijvoorbeeld komen door uitstel of verschillende
+          speeldagen. Vergelijk daarom naast het puntentotaal ook
+          het aantal gespeelde wedstrijden.
+        </p>
+      </details>
+
+      <details>
+        <summary>Wordt de agendatijd aangepast aan mijn tijdzone?</summary>
+        <p>
+          Je invoer wordt gelezen als lokale tijd op je apparaat.
+          De download slaat het tijdstip op in UTC. Agenda-apps tonen
+          dit doorgaans in hun ingestelde tijdzone. Controleer de
+          afspraak na het importeren.
+        </p>
+      </details>
+
+      <details>
+        <summary>Ontvang ik automatisch een melding?</summary>
+        <p>
+          De download bevat een verzoek om een melding vóór de aftrap.
+          Of je die ontvangt, hangt af van je agenda-app,
+          importinstellingen en meldingsrechten.
+        </p>
+      </details>
+
+      <details>
+        <summary>Is een hoge xG een garantie op winst?</summary>
+        <p>
+          Nee. xG beschrijft kansen volgens een model. Het is geen
+          garantie op doelpunten of een toekomstige uitslag.
+        </p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p>
+      Deze gids biedt algemene uitleg en een handmatige wedstrijdplanner.
+      Er worden geen live standen, uitzendrechten of uitslagen
+      op deze pagina geverifieerd.
+    </p>
+  </footer>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const form = document.getElementById("match-form");
+      const matchInput = document.getElementById("match");
+      const kickoffInput = document.getElementById("kickoff");
+      const preparationInput = document.getElementById("preparation");
+      const durationInput = document.getElementById("duration");
+      const result = document.getElementById("planner-result");
+      const downloadButton = document.getElementById("download-calendar");
+      const timezoneInfo = document.getElementById("timezone-info");
+
+      let currentPlan = null;
+
+      const timeZone =
+        Intl.DateTimeFormat().resolvedOptions().timeZone || "lokale tijd";
+
+      timezoneInfo.textContent =
+        "Tijdzone van je apparaat: " + timeZone +
+        ". Gebruik de aftraptijd die bij deze tijdzone hoort.";
+
+      const formatter = new Intl.DateTimeFormat("nl-NL", {
+        dateStyle: "full",
+        timeStyle: "short"
+      });
+
+      function addResultLine(label, value) {
+        const paragraph = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = label + " ";
+        paragraph.append(strong, document.createTextNode(value));
+        result.appendChild(paragraph);
+      }
+
+      function clearPlan() {
+        currentPlan = null;
+        downloadButton.disabled = true;
+        result.replaceChildren();
+      }
+
+      form.addEventListener("input", clearPlan);
+      form.addEventListener("change", clearPlan);
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        clearPlan();
+
+        const matchName = matchInput.value.trim();
+        const kickoff = new Date(kickoffInput.value);
+        const preparation = Number(preparationInput.value);
+        const duration = Number(durationInput.value);
+
+        if (!matchName || Number.isNaN(kickoff.getTime())) {
+          result.textContent =
+            "Vul een wedstrijd en een geldige datum en tijd in.";
+          return;
+        }
+
+        const preparationStarts =
+          new Date(kickoff.getTime() - preparation * 60000);
+
+        const reservedUntil =
+          new Date(kickoff.getTime() + duration * 60000);
+
+        currentPlan = {
+          matchName,
+          kickoff,
+          preparation,
+          reservedUntil
+        };
+
+        addResultLine("Wedstrijd:", matchName);
+        addResultLine("Voorbereiden vanaf:", formatter.format(preparationStarts));
+        addResultLine("Aftrap:", formatter.format(kickoff));
+        addResultLine("Tijd gereserveerd tot:", formatter.format(reservedUntil));
+
+        if (kickoff.getTime() < Date.now()) {
+          addResultLine("Let op:", "Het gekozen tijdstip ligt in het verleden.");
+        }
+
+        downloadButton.disabled = false;
+      });
+
+      function toCalendarDate(date) {
+        return date.toISOString()
+          .replace(/[-:]/g, "")
+          .replace(/\.\d{3}Z$/, "Z");
+      }
+
+      function escapeCalendarText(value) {
+        return String(value)
+          .replace(/\\/g, "\\\\")
+          .replace(/\r?\n/g, "\\n")
+          .replace(/;/g, "\\;")
+          .replace(/,/g, "\\,");
+      }
+
+      // Fold calendar lines at 75 UTF-8 bytes for calendar compatibility.
+      function foldCalendarLine(line) {
+        const encoder = new TextEncoder();
+        let output = "";
+        let current = "";
+        let length = 0;
+
+        for (const character of line) {
+          const bytes = encoder.encode(character).length;
+
+          if (length + bytes > 75) {
+            output += current + "\r\n";
+            current = " ";
+            length = 1;
+          }
+
+          current += character;
+          length += bytes;
+        }
+
+        return output + current;
+      }
+
+      downloadButton.addEventListener("click", () => {
+        if (!currentPlan) return;
+
+        const plan = currentPlan;
+
+        const uid = (
+          globalThis.crypto &&
+          typeof globalThis.crypto.randomUUID === "function"
+        )
+          ? globalThis.crypto.randomUUID()
+          : Date.now() + "-" + Math.random().toString(36).slice(2);
+
+        const description =
+          "Handmatig ingeplande voetbalwedstrijd. " +
+          "Controleer datum, aftraptijd en uitzending bij de aanbieder. " +
+          "De eindtijd is gereserveerde kijktijd en geen officiële eindtijd.";
+
+        const lines = [
+          "BEGIN:VCALENDAR",
+          "VERSION:2.0",
+          "PRODID:-//Footy Tables Analytics//Wedstrijdplanner//NL",
+          "CALSCALE:GREGORIAN",
+          "BEGIN:VEVENT",
+          "UID:" + uid + "@footy-planner",
+          "DTSTAMP:" + toCalendarDate(new Date()),
+          "DTSTART:" + toCalendarDate(plan.kickoff),
+          "DTEND:" + toCalendarDate(plan.reservedUntil),
+          "SUMMARY:" + escapeCalendarText(plan.matchName),
+          "DESCRIPTION:" + escapeCalendarText(description),
+          "BEGIN:VALARM",
+          "TRIGGER:-PT" + plan.preparation + "M",
+          "ACTION:DISPLAY",
+          "DESCRIPTION:" + escapeCalendarText(
+            "Voorbereiden op " + plan.matchName
+          ),
+          "END:VALARM",
+          "END:VEVENT",
+          "END:VCALENDAR"
+        ];
+
+        const calendar =
+          lines.map(foldCalendarLine).join("\r\n") + "\r\n";
+
+        const blob = new Blob([calendar], {
+          type: "text/calendar;charset=utf-8"
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "voetbalwedstrijd.ics";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      });
+    })();
+  </script>
 </body>
 </html>
